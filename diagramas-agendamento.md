@@ -1,4 +1,4 @@
-# Diagramas UML - Módulo Agendamento de Consultas
+# Diagramas UML - Módulo Agendamento de Consultas (Corrigido)
 
 ## 1. Diagrama de Caso de Uso
 
@@ -6,7 +6,7 @@
 graph TB
     %% Atores
     R[👤 Recepcionista]
-    M[👨‍⚕️ Médico]
+    M[👨⚕️ Médico]
     P[👥 Paciente]
     
     %% Sistema
@@ -44,12 +44,12 @@ graph TB
     P -.-> UC10
     
     %% Relacionamentos entre casos de uso
-    UC3 ..> UC1 : <<include>>
-    UC3 ..> UC4 : <<include>>
-    UC3 ..> UC10 : <<include>>
-    UC2 ..> UC3 : <<extend>>
-    UC6 ..> UC5 : <<include>>
-    UC6 ..> UC3 : <<include>>
+    UC3 -.-> UC1
+    UC3 -.-> UC4
+    UC3 -.-> UC10
+    UC2 -.-> UC3
+    UC6 -.-> UC5
+    UC6 -.-> UC3
     
     %% Estilos
     classDef ator fill:#e1f5fe,stroke:#01579b,stroke-width:2px
@@ -76,33 +76,33 @@ sequenceDiagram
     %% 1. Buscar Paciente
     R->>+UI: Digita nome/CPF do paciente
     UI->>+S: buscarPaciente(termo)
-    S->>+DB: SELECT * FROM pacientes WHERE nome LIKE '%termo%'
+    S->>+DB: SELECT pacientes
     DB-->>-S: Lista de pacientes
     S-->>-UI: Retorna pacientes encontrados
     UI-->>-R: Exibe lista de pacientes
     
-    R->>+UI: Seleciona paciente
+    R->>UI: Seleciona paciente
     UI->>UI: Armazena dados do paciente
     
     %% 2. Selecionar Médico
-    R->>+UI: Seleciona especialidade (opcional)
+    R->>+UI: Seleciona especialidade
     UI->>+S: listarMedicos(especialidade)
-    S->>+DB: SELECT * FROM medicos WHERE especialidade = ?
+    S->>+DB: SELECT medicos
     DB-->>-S: Lista de médicos
     S-->>-UI: Retorna médicos disponíveis
     UI-->>-R: Exibe lista de médicos
     
-    R->>+UI: Seleciona médico
+    R->>UI: Seleciona médico
     UI->>UI: Armazena dados do médico
     
     %% 3. Selecionar Data
     R->>+UI: Seleciona data
     UI->>+S: verificarDisponibilidade(medicoId, data)
-    S->>+DB: SELECT * FROM consultas WHERE medico_id = ? AND data = ?
+    S->>+DB: SELECT consultas existentes
     DB-->>-S: Consultas existentes
     S->>S: Calcula horários disponíveis
     S-->>-UI: Retorna grade de horários
-    UI-->>-R: Exibe horários disponíveis/ocupados
+    UI-->>-R: Exibe horários disponíveis
     
     %% 4. Selecionar Horário
     R->>+UI: Seleciona horário
@@ -110,7 +110,7 @@ sequenceDiagram
     UI-->>-R: Exibe resumo da consulta
     
     %% 5. Confirmar Agendamento
-    R->>+UI: Clica "Confirmar Agendamento"
+    R->>+UI: Clica Confirmar Agendamento
     UI->>+S: confirmarAgendamento(dadosConsulta)
     
     %% Validações
@@ -119,25 +119,16 @@ sequenceDiagram
     DB-->>-S: Horário ainda disponível
     
     alt Horário disponível
-        %% Criar consulta
-        S->>+DB: INSERT INTO consultas (paciente_id, medico_id, data_hora, status)
-        DB-->>-S: Consulta criada (ID)
-        
-        %% Gerar protocolo
+        S->>+DB: INSERT consulta
+        DB-->>-S: Consulta criada
         S->>S: Gerar protocolo único
-        
-        %% Notificar paciente
-        S->>+N: enviarNotificacao(pacienteId, dadosConsulta)
+        S->>+N: enviarNotificacao(pacienteId)
         N->>N: Enviar SMS/Email
         N-->>-S: Notificação enviada
-        
-        %% Registrar log
-        S->>+DB: INSERT INTO logs (acao, usuario, detalhes)
+        S->>+DB: INSERT log
         DB-->>-S: Log registrado
-        
-        S-->>-UI: Agendamento confirmado (protocolo)
-        UI-->>R: Exibe modal de sucesso com protocolo
-        
+        S-->>-UI: Agendamento confirmado
+        UI-->>R: Exibe modal de sucesso
     else Horário indisponível
         S-->>-UI: Erro: Horário não disponível
         UI-->>R: Exibe mensagem de erro
@@ -163,7 +154,7 @@ flowchart TD
     CreatePatient --> SelectPatient
     
     SelectPatient --> FilterSpecialty[🏥 Filtrar Especialidade]
-    FilterSpecialty --> SelectDoctor[👨‍⚕️ Selecionar Médico]
+    FilterSpecialty --> SelectDoctor[👨⚕️ Selecionar Médico]
     
     SelectDoctor --> SelectDate[📅 Selecionar Data]
     SelectDate --> ValidateDate{Data Válida?}
