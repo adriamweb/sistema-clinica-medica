@@ -65,81 +65,53 @@ graph TB
 
 ```mermaid
 sequenceDiagram
-    participant R as 👤 Recepcionista
-    participant UI as 🖥️ Interface
-    participant S as ⚙️ Sistema
-    participant DB as 🗄️ Banco de Dados
-    participant N as 📧 Notificação
+    participant R as Recepcionista
+    participant UI as Interface
+    participant S as Sistema
+    participant DB as Banco
+    participant N as Notificacao
     
-    Note over R,N: Fluxo: Realizar Agendamento de Consulta
-    
-    %% 1. Buscar Paciente
-    R->>+UI: Digita nome/CPF do paciente
-    UI->>+S: buscarPaciente(termo)
-    S->>+DB: SELECT pacientes
-    DB-->>-S: Lista de pacientes
-    S-->>-UI: Retorna pacientes encontrados
-    UI-->>-R: Exibe lista de pacientes
+    R->>UI: Digita nome do paciente
+    UI->>S: buscarPaciente(termo)
+    S->>DB: SELECT pacientes
+    DB-->>S: Lista de pacientes
+    S-->>UI: Retorna pacientes
+    UI-->>R: Exibe lista
     
     R->>UI: Seleciona paciente
-    UI->>UI: Armazena dados do paciente
+    R->>UI: Seleciona especialidade
+    UI->>S: listarMedicos(especialidade)
+    S->>DB: SELECT medicos
+    DB-->>S: Lista de medicos
+    S-->>UI: Retorna medicos
+    UI-->>R: Exibe medicos
     
-    %% 2. Selecionar Médico
-    R->>+UI: Seleciona especialidade
-    UI->>+S: listarMedicos(especialidade)
-    S->>+DB: SELECT medicos
-    DB-->>-S: Lista de médicos
-    S-->>-UI: Retorna médicos disponíveis
-    UI-->>-R: Exibe lista de médicos
+    R->>UI: Seleciona medico
+    R->>UI: Seleciona data
+    UI->>S: verificarDisponibilidade(medicoId, data)
+    S->>DB: SELECT consultas
+    DB-->>S: Consultas existentes
+    S-->>UI: Grade de horarios
+    UI-->>R: Exibe horarios
     
-    R->>UI: Seleciona médico
-    UI->>UI: Armazena dados do médico
+    R->>UI: Seleciona horario
+    UI-->>R: Exibe resumo
+    R->>UI: Confirma agendamento
+    UI->>S: confirmarAgendamento(dados)
     
-    %% 3. Selecionar Data
-    R->>+UI: Seleciona data
-    UI->>+S: verificarDisponibilidade(medicoId, data)
-    S->>+DB: SELECT consultas existentes
-    DB-->>-S: Consultas existentes
-    S->>S: Calcula horários disponíveis
-    S-->>-UI: Retorna grade de horários
-    UI-->>-R: Exibe horários disponíveis
-    
-    %% 4. Selecionar Horário
-    R->>+UI: Seleciona horário
-    UI->>UI: Valida seleção
-    UI-->>-R: Exibe resumo da consulta
-    
-    %% 5. Confirmar Agendamento
-    R->>+UI: Clica Confirmar Agendamento
-    UI->>+S: confirmarAgendamento(dadosConsulta)
-    
-    %% Validações
-    S->>S: Validar regras de negócio
-    S->>+DB: Verificar disponibilidade final
-    DB-->>-S: Horário ainda disponível
-    
-    alt Horário disponível
-        S->>+DB: INSERT consulta
-        DB-->>-S: Consulta criada
-        S->>S: Gerar protocolo único
-        S->>+N: enviarNotificacao(pacienteId)
-        N->>N: Enviar SMS/Email
-        N-->>-S: Notificação enviada
-        S->>+DB: INSERT log
-        DB-->>-S: Log registrado
-        S-->>-UI: Agendamento confirmado
-        UI-->>R: Exibe modal de sucesso
-    else Horário indisponível
-        S-->>-UI: Erro: Horário não disponível
-        UI-->>R: Exibe mensagem de erro
-        UI->>UI: Atualiza grade de horários
+    alt Horario disponivel
+        S->>DB: INSERT consulta
+        DB-->>S: Consulta criada
+        S->>N: enviarNotificacao(paciente)
+        N-->>S: Notificacao enviada
+        S->>DB: INSERT log
+        DB-->>S: Log registrado
+        S-->>UI: Agendamento confirmado
+        UI-->>R: Modal de sucesso
+    else Horario indisponivel
+        S-->>UI: Erro horario
+        UI-->>R: Mensagem de erro
     end
-    
-    %% 6. Finalização
-    R->>UI: Fecha modal de confirmação
-    UI->>UI: Limpa formulário
-    
-    Note over R,N: Consulta agendada com sucesso!
 ```
 
 ## 3. Diagrama de Atividades - Processo de Agendamento
