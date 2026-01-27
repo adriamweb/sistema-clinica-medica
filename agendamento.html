@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento de Consultas - Clínica Médica</title>
+    <link rel="stylesheet" href="agendamento.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🏥 Agendamento de Consultas</h1>
+            <p>Sistema de Gestão da Clínica Médica</p>
+        </header>
+
+        <form class="agendamento-form" id="agendamentoForm">
+            <!-- Seleção de Paciente -->
+            <div class="form-section">
+                <h2>👤 Paciente</h2>
+                <div class="form-group">
+                    <label for="paciente">Buscar Paciente:</label>
+                    <div class="search-container">
+                        <input type="text" id="paciente" placeholder="Digite nome ou CPF do paciente" required>
+                        <button type="button" class="btn-secondary">+ Novo Paciente</button>
+                    </div>
+                    <div class="paciente-info" id="pacienteInfo" style="display: none;">
+                        <span class="info-label">Selecionado:</span>
+                        <span class="info-value" id="pacienteNome">Maria Silva Santos</span>
+                        <span class="info-cpf">CPF: 123.456.789-00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seleção de Médico -->
+            <div class="form-section">
+                <h2>👨‍⚕️ Médico</h2>
+                <div class="form-group">
+                    <label for="especialidade">Especialidade:</label>
+                    <select id="especialidade" onchange="filtrarMedicos()">
+                        <option value="">Todas as especialidades</option>
+                        <option value="cardiologia">Cardiologia</option>
+                        <option value="dermatologia">Dermatologia</option>
+                        <option value="pediatria">Pediatria</option>
+                        <option value="ortopedia">Ortopedia</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="medico">Médico:</label>
+                    <select id="medico" required onchange="atualizarDisponibilidade()">
+                        <option value="">Selecione um médico</option>
+                        <option value="1" data-especialidade="cardiologia">Dr. João Silva - Cardiologia</option>
+                        <option value="2" data-especialidade="dermatologia">Dra. Maria Santos - Dermatologia</option>
+                        <option value="3" data-especialidade="pediatria">Dr. Pedro Costa - Pediatria</option>
+                        <option value="4" data-especialidade="ortopedia">Dra. Ana Oliveira - Ortopedia</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Seleção de Data -->
+            <div class="form-section">
+                <h2>📅 Data da Consulta</h2>
+                <div class="form-group">
+                    <label for="data">Selecione a Data:</label>
+                    <input type="date" id="data" required onchange="atualizarHorarios()" min="">
+                </div>
+            </div>
+
+            <!-- Grade de Horários -->
+            <div class="form-section">
+                <h2>🕐 Horários Disponíveis</h2>
+                <div class="horarios-container" id="horariosContainer">
+                    <div class="horarios-grid">
+                        <button type="button" class="horario-btn disponivel" data-horario="07:00">07:00</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="07:30">07:30</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="08:00">08:00</button>
+                        <button type="button" class="horario-btn ocupado" data-horario="08:30" disabled>08:30</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="09:00">09:00</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="09:30">09:30</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="10:00">10:00</button>
+                        <button type="button" class="horario-btn ocupado" data-horario="10:30" disabled>10:30</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="11:00">11:00</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="11:30">11:30</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="14:00">14:00</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="14:30">14:30</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="15:00">15:00</button>
+                        <button type="button" class="horario-btn ocupado" data-horario="15:30" disabled>15:30</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="16:00">16:00</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="16:30">16:30</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="17:00">17:00</button>
+                        <button type="button" class="horario-btn disponivel" data-horario="17:30">17:30</button>
+                    </div>
+                    <div class="legenda">
+                        <span class="legenda-item"><span class="cor disponivel"></span> Disponível</span>
+                        <span class="legenda-item"><span class="cor ocupado"></span> Ocupado</span>
+                        <span class="legenda-item"><span class="cor selecionado"></span> Selecionado</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumo da Consulta -->
+            <div class="form-section resumo-section" id="resumoSection" style="display: none;">
+                <h2>📋 Resumo da Consulta</h2>
+                <div class="resumo-content">
+                    <div class="resumo-item">
+                        <span class="resumo-label">Paciente:</span>
+                        <span class="resumo-value" id="resumoPaciente">-</span>
+                    </div>
+                    <div class="resumo-item">
+                        <span class="resumo-label">Médico:</span>
+                        <span class="resumo-value" id="resumoMedico">-</span>
+                    </div>
+                    <div class="resumo-item">
+                        <span class="resumo-label">Data:</span>
+                        <span class="resumo-value" id="resumoData">-</span>
+                    </div>
+                    <div class="resumo-item">
+                        <span class="resumo-label">Horário:</span>
+                        <span class="resumo-value" id="resumoHorario">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="limparFormulario()">Limpar</button>
+                <button type="submit" class="btn-primary" id="btnConfirmar" disabled>Confirmar Agendamento</button>
+            </div>
+        </form>
+
+        <!-- Modal de Confirmação -->
+        <div class="modal" id="modalConfirmacao" style="display: none;">
+            <div class="modal-content">
+                <h3>✅ Consulta Agendada com Sucesso!</h3>
+                <p>Protocolo: <strong id="protocoloNumero">#AG2024001</strong></p>
+                <p>A consulta foi agendada e o paciente será notificado.</p>
+                <button class="btn-primary" onclick="fecharModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="agendamento.js"></script>
+</body>
+</html>
