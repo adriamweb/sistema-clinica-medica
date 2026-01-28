@@ -8,15 +8,16 @@ from datetime import datetime
 import sys
 import os
 
-# Adicionar o diretório do módulo triagem ao path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Construção de Software (PRO)')))
+# Adicionar o diretório correto ao path
+caminho_triagem = os.path.join(os.path.dirname(__file__), '..', 'Construção de Software (PRO)')
+sys.path.insert(0, os.path.abspath(caminho_triagem))
 
-import triagem
+from triagem import Paciente
 
 
 def test_criacao_paciente_valido():
     """Testa criação de paciente com dados válidos."""
-    paciente = triagem.Paciente("João Silva", 45, 3)
+    paciente = Paciente("João Silva", 45, 3)
     
     assert paciente.nome == "João Silva"
     assert paciente.idade == 45
@@ -28,7 +29,7 @@ def test_criacao_paciente_valido():
 def test_timestamp_automatico():
     """Testa se timestamp é gerado automaticamente."""
     antes = datetime.now()
-    paciente = triagem.Paciente("Maria", 30, 2)
+    paciente = Paciente("Maria", 30, 2)
     depois = datetime.now()
     
     assert antes <= paciente.timestamp <= depois
@@ -37,8 +38,8 @@ def test_timestamp_automatico():
 
 def test_urgencia_valida():
     """Testa urgências válidas (1-5)."""
-    p1 = triagem.Paciente("Ana", 25, 1)
-    p5 = triagem.Paciente("Carlos", 60, 5)
+    p1 = Paciente("Ana", 25, 1)
+    p5 = Paciente("Carlos", 60, 5)
     
     assert p1.urgencia == 1
     assert p5.urgencia == 5
@@ -48,13 +49,13 @@ def test_urgencia_valida():
 def test_urgencia_invalida():
     """Testa que urgências inválidas geram erro."""
     try:
-        triagem.Paciente("Pedro", 40, 0)
+        Paciente("Pedro", 40, 0)
         assert False, "Deveria ter dado erro"
     except ValueError as e:
         assert "Urgência deve estar entre 1 e 5" in str(e)
     
     try:
-        triagem.Paciente("Lucia", 35, 6)
+        Paciente("Lucia", 35, 6)
         assert False, "Deveria ter dado erro"
     except ValueError as e:
         assert "Urgência deve estar entre 1 e 5" in str(e)
@@ -64,8 +65,8 @@ def test_urgencia_invalida():
 
 def test_idade_valida():
     """Testa idades válidas."""
-    bebe = triagem.Paciente("Bebê", 0, 4)
-    idoso = triagem.Paciente("Centenário", 120, 2)
+    bebe = Paciente("Bebê", 0, 4)
+    idoso = Paciente("Centenário", 120, 2)
     
     assert bebe.idade == 0
     assert idoso.idade == 120
@@ -75,7 +76,7 @@ def test_idade_valida():
 def test_idade_invalida():
     """Testa que idade negativa gera erro."""
     try:
-        triagem.Paciente("Inválido", -1, 3)
+        Paciente("Inválido", -1, 3)
         assert False, "Deveria ter dado erro"
     except ValueError as e:
         assert "Idade deve ser positiva" in str(e)
