@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
 Sistema de Triagem de Pacientes - Clínica Médica
-Gerencia fila de espera com priorização por urgência.
+Gerencia fila de espera com priorização por urgência e ordem de chegada.
 """
 
 from typing import List
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime
 
 
 @dataclass
@@ -14,6 +15,7 @@ class Paciente:
     nome: str
     idade: int
     urgencia: int  # 1 (baixa) a 5 (crítica)
+    timestamp: datetime = field(default_factory=datetime.now)
     
     def __post_init__(self) -> None:
         """Valida os dados do paciente após inicialização."""
@@ -41,12 +43,13 @@ class GerenciadorTriagem:
     
     def obter_fila_ordenada(self) -> List[Paciente]:
         """
-        Retorna fila ordenada por prioridade de urgência.
+        Retorna fila ordenada por prioridade de urgência e ordem de chegada.
         
         Returns:
-            Lista de pacientes ordenada por urgência (maior primeiro)
+            Lista de pacientes ordenada por urgência (maior primeiro),
+            depois por timestamp (quem chegou primeiro)
         """
-        return ordenar_por_urgencia(self.fila)
+        return ordenar_por_prioridade(self.fila)
     
     def atender_proximo(self) -> Paciente:
         """
@@ -67,7 +70,7 @@ class GerenciadorTriagem:
         return proximo
     
     def listar_fila(self) -> None:
-        """Exibe a fila atual ordenada por urgência."""
+        """Exibe a fila atual ordenada por prioridade."""
         if not self.fila:
             print("Fila vazia")
             return
@@ -76,20 +79,21 @@ class GerenciadorTriagem:
         print("=== FILA DE TRIAGEM ===")
         for i, paciente in enumerate(fila_ordenada, 1):
             urgencia_texto = obter_texto_urgencia(paciente.urgencia)
-            print(f"{i}. {paciente.nome} ({paciente.idade} anos) - {urgencia_texto}")
+            chegada = paciente.timestamp.strftime("%H:%M:%S")
+            print(f"{i}. {paciente.nome} ({paciente.idade} anos) - {urgencia_texto} - Chegada: {chegada}")
 
 
-def ordenar_por_urgencia(pacientes: List[Paciente]) -> List[Paciente]:
+def ordenar_por_prioridade(pacientes: List[Paciente]) -> List[Paciente]:
     """
-    Ordena lista de pacientes por urgência (maior primeiro).
+    Ordena pacientes por urgência (maior primeiro) e timestamp (primeiro a chegar).
     
     Args:
         pacientes: Lista de pacientes para ordenar
         
     Returns:
-        Lista ordenada por urgência decrescente, depois por idade crescente
+        Lista ordenada por urgência decrescente, depois por timestamp crescente
     """
-    return sorted(pacientes, key=lambda p: (-p.urgencia, p.idade))
+    return sorted(pacientes, key=lambda p: (-p.urgencia, p.timestamp))
 
 
 def obter_texto_urgencia(nivel: int) -> str:
@@ -113,29 +117,41 @@ def obter_texto_urgencia(nivel: int) -> str:
 
 
 def demonstracao() -> None:
-    """Demonstra o funcionamento do sistema de triagem."""
-    print("🏥 Sistema de Triagem - Clínica Médica")
-    print("=" * 40)
+    """Demonstra o funcionamento do sistema com teste de desempate por timestamp."""
+    print("🏥 Sistema de Triagem - Clínica Médica (com timestamp)")
+    print("=" * 50)
     
     # Criar gerenciador
     triagem = GerenciadorTriagem()
     
-    # Adicionar pacientes de exemplo
+    # Simular chegadas em horários diferentes
+    import time
+    
+    print("Simulando chegadas de pacientes...")
+    
+    # Pacientes com mesma urgência para testar desempate
     pacientes_exemplo = [
-        Paciente("Maria Silva", 45, 2),
-        Paciente("João Santos", 78, 4),
-        Paciente("Ana Costa", 25, 1),
-        Paciente("Pedro Lima", 60, 5),
-        Paciente("Carla Souza", 35, 3)
+        Paciente("Maria Silva", 45, 3),  # Chega primeiro
+        Paciente("João Santos", 30, 5),  # Urgência crítica
     ]
     
-    print("Adicionando pacientes...")
     for paciente in pacientes_exemplo:
         triagem.adicionar_paciente(paciente)
-        print(f"+ {paciente.nome} (urgência {paciente.urgencia})")
+        print(f"+ {paciente.nome} (urgência {paciente.urgencia}) - {paciente.timestamp.strftime('%H:%M:%S')}")
+        time.sleep(0.1)  # Pequeno delay para timestamps diferentes
+    
+    # Adicionar outro paciente com mesma urgência que Maria
+    time.sleep(0.1)
+    paciente_tardio = Paciente("Carlos Lima", 40, 3)  # Mesma urgência, mas chega depois
+    triagem.adicionar_paciente(paciente_tardio)
+    print(f"+ {paciente_tardio.nome} (urgência {paciente_tardio.urgencia}) - {paciente_tardio.timestamp.strftime('%H:%M:%S')}")
     
     print("\n")
     triagem.listar_fila()
+    
+    print("\n📝 Teste de desempate:")
+    print("Maria e Carlos têm urgência 3, mas Maria chegou primeiro")
+    print("João tem urgência 5 (crítica) e deve ser atendido primeiro")
     
     print("\nAtendendo próximo paciente...")
     proximo = triagem.atender_proximo()
