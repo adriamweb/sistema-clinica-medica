@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
 Testes unitários para a classe Paciente do sistema de triagem.
+Testes usando apenas bibliotecas padrão do Python.
 """
 
-import pytest
 from datetime import datetime
 import sys
 import os
@@ -14,62 +14,88 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Construção de S
 from triagem import Paciente
 
 
-class TestPaciente:
-    """Testes para a classe Paciente."""
+def test_criacao_paciente_valido():
+    """Testa criação de paciente com dados válidos."""
+    paciente = Paciente("João Silva", 45, 3)
     
-    def test_criacao_paciente_valido(self):
-        """Testa criação de paciente com dados válidos."""
-        paciente = Paciente("João Silva", 45, 3)
-        
-        assert paciente.nome == "João Silva"
-        assert paciente.idade == 45
-        assert paciente.urgencia == 3
-        assert isinstance(paciente.timestamp, datetime)
+    assert paciente.nome == "João Silva"
+    assert paciente.idade == 45
+    assert paciente.urgencia == 3
+    assert isinstance(paciente.timestamp, datetime)
+    print("✅ test_criacao_paciente_valido passou")
+
+
+def test_timestamp_automatico():
+    """Testa se timestamp é gerado automaticamente."""
+    antes = datetime.now()
+    paciente = Paciente("Maria", 30, 2)
+    depois = datetime.now()
     
-    def test_timestamp_automatico(self):
-        """Testa se timestamp é gerado automaticamente."""
-        antes = datetime.now()
-        paciente = Paciente("Maria", 30, 2)
-        depois = datetime.now()
-        
-        assert antes <= paciente.timestamp <= depois
+    assert antes <= paciente.timestamp <= depois
+    print("✅ test_timestamp_automatico passou")
+
+
+def test_urgencia_valida():
+    """Testa urgências válidas (1-5)."""
+    p1 = Paciente("Ana", 25, 1)
+    p5 = Paciente("Carlos", 60, 5)
     
-    def test_urgencia_minima_valida(self):
-        """Testa urgência mínima válida (1)."""
-        paciente = Paciente("Ana", 25, 1)
-        assert paciente.urgencia == 1
+    assert p1.urgencia == 1
+    assert p5.urgencia == 5
+    print("✅ test_urgencia_valida passou")
+
+
+def test_urgencia_invalida():
+    """Testa que urgências inválidas geram erro."""
+    try:
+        Paciente("Pedro", 40, 0)
+        assert False, "Deveria ter dado erro"
+    except ValueError as e:
+        assert "Urgência deve estar entre 1 e 5" in str(e)
     
-    def test_urgencia_maxima_valida(self):
-        """Testa urgência máxima válida (5)."""
-        paciente = Paciente("Carlos", 60, 5)
-        assert paciente.urgencia == 5
+    try:
+        Paciente("Lucia", 35, 6)
+        assert False, "Deveria ter dado erro"
+    except ValueError as e:
+        assert "Urgência deve estar entre 1 e 5" in str(e)
     
-    def test_urgencia_zero_invalida(self):
-        """Testa que urgência 0 é inválida."""
-        with pytest.raises(ValueError, match="Urgência deve estar entre 1 e 5"):
-            Paciente("Pedro", 40, 0)
+    print("✅ test_urgencia_invalida passou")
+
+
+def test_idade_valida():
+    """Testa idades válidas."""
+    bebe = Paciente("Bebê", 0, 4)
+    idoso = Paciente("Centenário", 120, 2)
     
-    def test_urgencia_seis_invalida(self):
-        """Testa que urgência 6 é inválida."""
-        with pytest.raises(ValueError, match="Urgência deve estar entre 1 e 5"):
-            Paciente("Lucia", 35, 6)
+    assert bebe.idade == 0
+    assert idoso.idade == 120
+    print("✅ test_idade_valida passou")
+
+
+def test_idade_invalida():
+    """Testa que idade negativa gera erro."""
+    try:
+        Paciente("Inválido", -1, 3)
+        assert False, "Deveria ter dado erro"
+    except ValueError as e:
+        assert "Idade deve ser positiva" in str(e)
     
-    def test_urgencia_negativa_invalida(self):
-        """Testa que urgência negativa é inválida."""
-        with pytest.raises(ValueError, match="Urgência deve estar entre 1 e 5"):
-            Paciente("Roberto", 50, -1)
+    print("✅ test_idade_invalida passou")
+
+
+def executar_testes():
+    """Executa todos os testes da classe Paciente."""
+    print("🧪 Executando testes da classe Paciente...")
     
-    def test_idade_zero_valida(self):
-        """Testa que idade 0 é válida (recém-nascido)."""
-        paciente = Paciente("Bebê", 0, 4)
-        assert paciente.idade == 0
+    test_criacao_paciente_valido()
+    test_timestamp_automatico()
+    test_urgencia_valida()
+    test_urgencia_invalida()
+    test_idade_valida()
+    test_idade_invalida()
     
-    def test_idade_negativa_invalida(self):
-        """Testa que idade negativa é inválida."""
-        with pytest.raises(ValueError, match="Idade deve ser positiva"):
-            Paciente("Inválido", -1, 3)
-    
-    def test_idade_muito_alta_valida(self):
-        """Testa que idade muito alta é válida."""
-        paciente = Paciente("Centenário", 120, 2)
-        assert paciente.idade == 120
+    print("\n✅ Todos os testes da classe Paciente passaram!")
+
+
+if __name__ == "__main__":
+    executar_testes()
