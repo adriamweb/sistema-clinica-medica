@@ -1,55 +1,45 @@
 #!/usr/bin/env python3
 """
-Algoritmo de Dijkstra - Caminho Mais Curto em Grafo Ponderado
+Algoritmo de Dijkstra - Solução do problema "Dijkstra?" do Codeforces
 Implementação clean code com separação de responsabilidades.
+
+Problema: https://codeforces.com/problemset/problem/20/C
+Encontrar o caminho mais curto do vértice 1 ao vértice n em um grafo ponderado.
 """
 
 import heapq
 from typing import Dict, List, Tuple, Optional, Set
 from dataclasses import dataclass
+import sys
 
 
 @dataclass
 class Aresta:
     """Representa uma aresta do grafo com destino e peso."""
-    destino: str
-    peso: float
+    destino: int
+    peso: int
 
 
 class Grafo:
     """Estrutura de dados para representar um grafo ponderado."""
     
-    def __init__(self) -> None:
-        """Inicializa um grafo vazio."""
-        self._adjacencias: Dict[str, List[Aresta]] = {}
+    def __init__(self, n: int) -> None:
+        """Inicializa um grafo com n vértices."""
+        self._adjacencias: Dict[int, List[Aresta]] = {i: [] for i in range(1, n + 1)}
     
-    def adicionar_vertice(self, vertice: str) -> None:
+    def adicionar_aresta(self, origem: int, destino: int, peso: int) -> None:
         """
-        Adiciona um vértice ao grafo.
-        
-        Args:
-            vertice: Nome do vértice a ser adicionado
-        """
-        if vertice not in self._adjacencias:
-            self._adjacencias[vertice] = []
-    
-    def adicionar_aresta(self, origem: str, destino: str, peso: float) -> None:
-        """
-        Adiciona uma aresta direcionada ao grafo.
+        Adiciona uma aresta bidirecional ao grafo.
         
         Args:
             origem: Vértice de origem
             destino: Vértice de destino
-            peso: Peso da aresta (deve ser não-negativo)
+            peso: Peso da aresta
         """
-        if peso < 0:
-            raise ValueError("Dijkstra não funciona com pesos negativos")
-        
-        self.adicionar_vertice(origem)
-        self.adicionar_vertice(destino)
         self._adjacencias[origem].append(Aresta(destino, peso))
+        self._adjacencias[destino].append(Aresta(origem, peso))
     
-    def obter_vizinhos(self, vertice: str) -> List[Aresta]:
+    def obter_vizinhos(self, vertice: int) -> List[Aresta]:
         """
         Retorna os vizinhos de um vértice.
         
@@ -60,26 +50,18 @@ class Grafo:
             Lista de arestas conectadas ao vértice
         """
         return self._adjacencias.get(vertice, [])
-    
-    def obter_vertices(self) -> Set[str]:
-        """
-        Retorna todos os vértices do grafo.
-        
-        Returns:
-            Conjunto com todos os vértices
-        """
-        return set(self._adjacencias.keys())
 
 
-class Dijkstra:
-    """Implementação do algoritmo de Dijkstra."""
+class DijkstraSolver:
+    """Solver para o problema Dijkstra? do Codeforces."""
     
     @staticmethod
     def encontrar_caminho_mais_curto(
         grafo: Grafo, 
-        origem: str, 
-        destino: str
-    ) -> Tuple[Optional[float], Optional[List[str]]]:
+        origem: int, 
+        destino: int,
+        n: int
+    ) -> Tuple[Optional[int], Optional[List[int]]]:
         """
         Encontra o caminho mais curto entre dois vértices usando Dijkstra.
         
@@ -87,29 +69,20 @@ class Dijkstra:
             grafo: Grafo ponderado onde buscar o caminho
             origem: Vértice de origem
             destino: Vértice de destino
+            n: Número total de vértices
             
         Returns:
             Tupla contendo:
             - Distância mínima (None se não houver caminho)
             - Lista com o caminho (None se não houver caminho)
-            
-        Raises:
-            ValueError: Se origem ou destino não existirem no grafo
         """
-        vertices = grafo.obter_vertices()
-        
-        if origem not in vertices:
-            raise ValueError(f"Vértice de origem '{origem}' não existe no grafo")
-        if destino not in vertices:
-            raise ValueError(f"Vértice de destino '{destino}' não existe no grafo")
-        
         # Inicialização
-        distancias: Dict[str, float] = {v: float('inf') for v in vertices}
-        predecessores: Dict[str, Optional[str]] = {v: None for v in vertices}
-        visitados: Set[str] = set()
+        distancias: List[int] = [float('inf')] * (n + 1)
+        predecessores: List[Optional[int]] = [None] * (n + 1)
+        visitados: Set[int] = set()
         
         distancias[origem] = 0
-        fila_prioridade: List[Tuple[float, str]] = [(0, origem)]
+        fila_prioridade: List[Tuple[int, int]] = [(0, origem)]
         
         while fila_prioridade:
             distancia_atual, vertice_atual = heapq.heappop(fila_prioridade)
@@ -133,24 +106,25 @@ class Dijkstra:
                         predecessores[aresta.destino] = vertice_atual
                         heapq.heappush(fila_prioridade, (nova_distancia, aresta.destino))
         
-        # Reconstruir caminho
+        # Verificar se há caminho
         if distancias[destino] == float('inf'):
             return None, None
         
-        caminho = Dijkstra._reconstruir_caminho(predecessores, origem, destino)
+        # Reconstruir caminho
+        caminho = DijkstraSolver._reconstruir_caminho(predecessores, origem, destino)
         return distancias[destino], caminho
     
     @staticmethod
     def _reconstruir_caminho(
-        predecessores: Dict[str, Optional[str]], 
-        origem: str, 
-        destino: str
-    ) -> List[str]:
+        predecessores: List[Optional[int]], 
+        origem: int, 
+        destino: int
+    ) -> List[int]:
         """
         Reconstrói o caminho a partir dos predecessores.
         
         Args:
-            predecessores: Dicionário de predecessores
+            predecessores: Lista de predecessores
             origem: Vértice de origem
             destino: Vértice de destino
             
@@ -168,50 +142,112 @@ class Dijkstra:
         return caminho
 
 
-def main() -> None:
-    """Demonstração do algoritmo de Dijkstra."""
-    # Criar grafo de exemplo
-    grafo = Grafo()
+def resolver_codeforces() -> None:
+    """
+    Resolve o problema "Dijkstra?" do Codeforces.
     
-    # Adicionar arestas (origem, destino, peso)
+    Input:
+    - Primeira linha: n (vértices) e m (arestas)
+    - Próximas m linhas: a, b, w (aresta de a para b com peso w)
+    
+    Output:
+    - Se não há caminho: -1
+    - Se há caminho: caminho do vértice 1 ao vértice n
+    """
+    # Leitura da entrada
+    n, m = map(int, input().split())
+    
+    # Criar grafo
+    grafo = Grafo(n)
+    
+    # Adicionar arestas
+    for _ in range(m):
+        a, b, w = map(int, input().split())
+        grafo.adicionar_aresta(a, b, w)
+    
+    # Encontrar caminho mais curto do vértice 1 ao vértice n
+    distancia, caminho = DijkstraSolver.encontrar_caminho_mais_curto(grafo, 1, n, n)
+    
+    # Saída
+    if distancia is None or caminho is None:
+        print(-1)
+    else:
+        print(' '.join(map(str, caminho)))
+
+
+def demonstracao() -> None:
+    """
+    Demonstração do algoritmo com exemplo do Codeforces.
+    
+    Exemplo de entrada:
+    5 6
+    1 2 2
+    2 5 5
+    2 3 4
+    1 4 1
+    4 3 3
+    3 5 1
+    
+    Saída esperada: 1 4 3 5
+    """
+    print("🏆 Solução do problema 'Dijkstra?' - Codeforces")
+    print("=" * 55)
+    print("Exemplo de entrada:")
+    print("5 6")
+    print("1 2 2")
+    print("2 5 5")
+    print("2 3 4")
+    print("1 4 1")
+    print("4 3 3")
+    print("3 5 1")
+    print("=" * 55)
+    
+    # Simular entrada do exemplo
+    n, m = 5, 6
+    grafo = Grafo(n)
+    
     arestas = [
-        ("A", "B", 4),
-        ("A", "C", 2),
-        ("B", "C", 1),
-        ("B", "D", 5),
-        ("C", "D", 8),
-        ("C", "E", 10),
-        ("D", "E", 2)
+        (1, 2, 2),
+        (2, 5, 5),
+        (2, 3, 4),
+        (1, 4, 1),
+        (4, 3, 3),
+        (3, 5, 1)
     ]
     
-    for origem, destino, peso in arestas:
-        grafo.adicionar_aresta(origem, destino, peso)
+    for a, b, w in arestas:
+        grafo.adicionar_aresta(a, b, w)
     
-    print("🗺️  Algoritmo de Dijkstra - Caminho Mais Curto")
-    print("=" * 50)
-    print("Grafo de exemplo:")
-    print("A → B (4), A → C (2)")
-    print("B → C (1), B → D (5)")
-    print("C → D (8), C → E (10)")
-    print("D → E (2)")
-    print("=" * 50)
+    # Resolver
+    distancia, caminho = DijkstraSolver.encontrar_caminho_mais_curto(grafo, 1, n, n)
     
-    # Encontrar caminhos
-    casos_teste = [("A", "E"), ("A", "D"), ("B", "E"), ("A", "F")]
+    print(f"Caminho mais curto de 1 para {n}:")
+    if distancia is not None and caminho is not None:
+        print(f"Distância: {distancia}")
+        print(f"Caminho: {' → '.join(map(str, caminho))}")
+        print(f"Saída Codeforces: {' '.join(map(str, caminho))}")
+    else:
+        print("Não há caminho disponível")
+        print("Saída Codeforces: -1")
     
-    for origem, destino in casos_teste:
-        try:
-            distancia, caminho = Dijkstra.encontrar_caminho_mais_curto(grafo, origem, destino)
-            
-            if distancia is not None and caminho is not None:
-                print(f"Caminho de {origem} para {destino}:")
-                print(f"  Distância: {distancia}")
-                print(f"  Caminho: {' → '.join(caminho)}")
-            else:
-                print(f"Não há caminho de {origem} para {destino}")
-        except ValueError as e:
-            print(f"Erro: {e}")
-        print()
+    print("=" * 55)
+    print("\n📝 Documentação do Código:")
+    print("- Classe Aresta: Representa aresta com destino e peso")
+    print("- Classe Grafo: Estrutura do grafo com lista de adjacências")
+    print("- Classe DijkstraSolver: Implementação do algoritmo")
+    print("- Função resolver_codeforces(): Lê entrada e resolve problema")
+    print("- Complexidade: O((V + E) log V)")
+    print("- Usa heapq para fila de prioridade otimizada")
+
+
+def main() -> None:
+    """
+    Função principal - escolhe entre demonstração ou resolver problema.
+    """
+    if len(sys.argv) > 1 and sys.argv[1] == "--codeforces":
+        resolver_codeforces()
+    else:
+        demonstracao()
 
 
 if __name__ == "__main__":
