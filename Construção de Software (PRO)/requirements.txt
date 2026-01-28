@@ -1,7 +1,0 @@
-# Algoritmo de Dijkstra - Caminho Mais Curto
-# Este projeto usa apenas bibliotecas padrão do Python
-# - heapq: Fila de prioridade (biblioteca padrão)
-# - typing: Type hints (biblioteca padrão)
-# - dataclasses: Estruturas de dados (biblioteca padrão)
-
-# Nenhuma dependência externa é necessária
