@@ -9,23 +9,23 @@ import sys
 import os
 from io import StringIO
 
-# Adicionar o diretório pai ao path para importar o módulo
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Construção de Software (PRO)'))
+# Adicionar o diretório do módulo triagem ao path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Construção de Software (PRO)')))
 
-from triagem import Paciente, GerenciadorTriagem
+import triagem
 
 
 def test_inicializacao():
     """Testa inicialização do gerenciador."""
-    gerenciador = GerenciadorTriagem()
+    gerenciador = triagem.GerenciadorTriagem()
     assert gerenciador.fila == []
     print("✅ test_inicializacao passou")
 
 
 def test_adicionar_paciente():
     """Testa adição de paciente à fila."""
-    gerenciador = GerenciadorTriagem()
-    paciente = Paciente("João", 30, 3)
+    gerenciador = triagem.GerenciadorTriagem()
+    paciente = triagem.Paciente("João", 30, 3)
     
     gerenciador.adicionar_paciente(paciente)
     
@@ -36,13 +36,13 @@ def test_adicionar_paciente():
 
 def test_obter_fila_ordenada():
     """Testa obtenção da fila ordenada."""
-    gerenciador = GerenciadorTriagem()
+    gerenciador = triagem.GerenciadorTriagem()
     base_time = datetime.now()
     
-    p1 = Paciente("Baixa", 30, 1)
+    p1 = triagem.Paciente("Baixa", 30, 1)
     p1.timestamp = base_time
     
-    p2 = Paciente("Alta", 40, 4)
+    p2 = triagem.Paciente("Alta", 40, 4)
     p2.timestamp = base_time
     
     gerenciador.adicionar_paciente(p1)
@@ -57,13 +57,13 @@ def test_obter_fila_ordenada():
 
 def test_atender_proximo_sucesso():
     """Testa atendimento do próximo paciente com sucesso."""
-    gerenciador = GerenciadorTriagem()
+    gerenciador = triagem.GerenciadorTriagem()
     base_time = datetime.now()
     
-    p1 = Paciente("Normal", 30, 2)
+    p1 = triagem.Paciente("Normal", 30, 2)
     p1.timestamp = base_time
     
-    p2 = Paciente("Crítico", 40, 5)
+    p2 = triagem.Paciente("Crítico", 40, 5)
     p2.timestamp = base_time
     
     gerenciador.adicionar_paciente(p1)
@@ -79,7 +79,7 @@ def test_atender_proximo_sucesso():
 
 def test_atender_proximo_fila_vazia():
     """Testa atendimento com fila vazia."""
-    gerenciador = GerenciadorTriagem()
+    gerenciador = triagem.GerenciadorTriagem()
     
     try:
         gerenciador.atender_proximo()
@@ -92,12 +92,9 @@ def test_atender_proximo_fila_vazia():
 
 def test_listar_fila_vazia():
     """Testa listagem de fila vazia."""
-    gerenciador = GerenciadorTriagem()
+    gerenciador = triagem.GerenciadorTriagem()
     
     # Capturar saída do print
-    import sys
-    from io import StringIO
-    
     old_stdout = sys.stdout
     sys.stdout = fake_out = StringIO()
     
@@ -112,14 +109,14 @@ def test_listar_fila_vazia():
 
 def test_fluxo_completo():
     """Testa fluxo completo: adicionar, listar, atender."""
-    gerenciador = GerenciadorTriagem()
+    gerenciador = triagem.GerenciadorTriagem()
     base_time = datetime.now()
     
     # Adicionar pacientes
-    p1 = Paciente("Maria", 30, 2)
+    p1 = triagem.Paciente("Maria", 30, 2)
     p1.timestamp = base_time
     
-    p2 = Paciente("João", 40, 4)
+    p2 = triagem.Paciente("João", 40, 4)
     p2.timestamp = base_time + timedelta(seconds=1)
     
     gerenciador.adicionar_paciente(p1)
