@@ -1,0 +1,6 @@
+# Sistema de Triagem de Pacientes
+# Usa apenas bibliotecas padrão do Python:
+# - typing: Type hints (Python 3.5+)
+# - dataclasses: Estruturas de dados (Python 3.7+)
+
+# Nenhuma dependência externa necessária
