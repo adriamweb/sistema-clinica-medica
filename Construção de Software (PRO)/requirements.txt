@@ -1,3 +1,0 @@
-# Sistema de Notificação - Clínica Médica
-# Este projeto usa apenas bibliotecas padrão do Python
-# Nenhuma dependência externa é necessária
