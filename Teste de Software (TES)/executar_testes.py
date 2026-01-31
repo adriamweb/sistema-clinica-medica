@@ -14,6 +14,7 @@ from test_paciente import executar_testes as testes_paciente
 from test_ordenacao import executar_testes as testes_ordenacao
 from test_gerenciador import executar_testes as testes_gerenciador
 from test_texto_urgencia import executar_testes as testes_texto_urgencia
+from test_falhas_intencionais import executar_testes as testes_falhas
 
 
 def executar_todos_testes():
@@ -33,6 +34,14 @@ def executar_todos_testes():
         print()
         
         testes_texto_urgencia()
+        print()
+        
+        print("\n" + "="*60)
+        print("⚠️  EXECUTANDO TESTES DE FALHAS INTENCIONAIS")
+        print("📝 Estes testes DEVEM falhar para demonstrar tratamento de erros")
+        print("="*60)
+        
+        testes_falhas()
         print()
         
         print("🎉 TODOS OS TESTES PASSARAM COM SUCESSO!")
