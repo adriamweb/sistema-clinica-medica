@@ -230,11 +230,12 @@ def demonstracao() -> None:
     triagem.adicionar_paciente(paciente_tardio)
     print(f"+ {paciente_tardio.nome} (urgência {paciente_tardio.urgencia}) - {paciente_tardio.timestamp.strftime('%H:%M:%S')}")
     
-    # Simular erro de validação
+    # Simular erro de validação (TESTE INTENCIONAL)
+    print("\n🧪 Testando validação com dados inválidos (nome vazio, idade -5, urgência 10):")
     try:
         paciente_invalido = Paciente("", -5, 10)
     except ValueError as e:
-        print(f"\n⚠️  Erro capturado: {e}")
+        print(f"✅ Validação funcionou: {e}")
     
     print("\n")
     triagem.listar_fila()
