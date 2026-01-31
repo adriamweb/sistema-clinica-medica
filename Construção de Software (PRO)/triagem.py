@@ -25,14 +25,8 @@ class Paciente:
         """Valida os dados do paciente após inicialização."""
         # Validação com logging integrado
         if not validar_entrada_paciente(self.nome, self.idade, self.urgencia):
-            # Se validação falhou, lançar erro apropriado
-            if not 1 <= self.urgencia <= 5:
-                raise ValueError("Urgência deve estar entre 1 e 5")
-            if self.idade < 0:
-                raise ValueError("Idade deve ser positiva")
-            if not self.nome or not self.nome.strip():
-                raise ValueError("Nome não pode ser vazio")
-            # Erro genérico se chegou até aqui
+            # A função validar_entrada_paciente já fez o log do erro
+            # Apenas lançar exceção genérica
             raise ValueError("Dados de paciente inválidos")
         
         # Log de criação bem-sucedida
