@@ -1,0 +1,18 @@
+2026-01-31 15:36:56,075 | triagem_sistema | INFO | {"operacao": "inicializar_gerenciador", "timestamp": "2026-01-31T15:36:56.075367", "detalhes": {"fila_inicial": 0}}
+2026-01-31 15:36:56,075 | triagem_sistema | INFO | {"operacao": "criar_paciente", "timestamp": "2026-01-31T15:36:56.075468", "detalhes": {"nome": "Maria Silva", "idade": 45, "urgencia": 3, "timestamp": "2026-01-31T15:36:56.075463"}}
+2026-01-31 15:36:56,075 | triagem_sistema | INFO | {"operacao": "criar_paciente", "timestamp": "2026-01-31T15:36:56.075507", "detalhes": {"nome": "Jo\u00e3o Santos", "idade": 30, "urgencia": 5, "timestamp": "2026-01-31T15:36:56.075504"}}
+2026-01-31 15:36:56,075 | triagem_sistema | INFO | {"operacao": "adicionar_paciente", "timestamp": "2026-01-31T15:36:56.075610", "detalhes": {"paciente": "Maria Silva", "urgencia": 3, "tamanho_fila": 1}}
+2026-01-31 15:36:56,075 | triagem_sistema | INFO | {"operacao": "adicionar_paciente", "timestamp": "2026-01-31T15:36:56.075682", "detalhes": {"tempo_execucao": 9.703636169433594e-05, "sucesso": true}}
+2026-01-31 15:36:56,176 | triagem_sistema | INFO | {"operacao": "adicionar_paciente", "timestamp": "2026-01-31T15:36:56.176474", "detalhes": {"paciente": "Jo\u00e3o Santos", "urgencia": 5, "tamanho_fila": 2}}
+2026-01-31 15:36:56,176 | triagem_sistema | INFO | {"operacao": "adicionar_paciente", "timestamp": "2026-01-31T15:36:56.176786", "detalhes": {"tempo_execucao": 0.0006444454193115234, "sucesso": true}}
+2026-01-31 15:36:56,377 | triagem_sistema | INFO | {"operacao": "criar_paciente", "timestamp": "2026-01-31T15:36:56.377428", "detalhes": {"nome": "Carlos Lima", "idade": 40, "urgencia": 3, "timestamp": "2026-01-31T15:36:56.377368"}}
+2026-01-31 15:36:56,378 | triagem_sistema | INFO | {"operacao": "adicionar_paciente", "timestamp": "2026-01-31T15:36:56.378092", "detalhes": {"paciente": "Carlos Lima", "urgencia": 3, "tamanho_fila": 3}}
+2026-01-31 15:36:56,378 | triagem_sistema | INFO | {"operacao": "adicionar_paciente", "timestamp": "2026-01-31T15:36:56.378483", "detalhes": {"tempo_execucao": 0.00047779083251953125, "sucesso": true}}
+2026-01-31 15:36:56,379 | triagem_sistema | INFO | {"operacao": "ordenar_por_prioridade", "timestamp": "2026-01-31T15:36:56.379121", "detalhes": {"tempo_execucao": 4.172325134277344e-05, "sucesso": true}}
+2026-01-31 15:36:56,379 | triagem_sistema | INFO | {"operacao": "obter_fila_ordenada", "timestamp": "2026-01-31T15:36:56.379608", "detalhes": {"tempo_execucao": 0.0005991458892822266, "sucesso": true}}
+2026-01-31 15:36:56,379 | triagem_sistema | INFO | {"operacao": "ordenar_por_prioridade", "timestamp": "2026-01-31T15:36:56.379954", "detalhes": {"tempo_execucao": 5.7220458984375e-06, "sucesso": true}}
+2026-01-31 15:36:56,380 | triagem_sistema | INFO | {"operacao": "obter_fila_ordenada", "timestamp": "2026-01-31T15:36:56.380619", "detalhes": {"tempo_execucao": 0.000461578369140625, "sucesso": true}}
+2026-01-31 15:36:56,380 | triagem_sistema | INFO | {"operacao": "atender_paciente", "timestamp": "2026-01-31T15:36:56.380879", "detalhes": {"paciente": "Jo\u00e3o Santos", "urgencia": 5, "tempo_espera_segundos": 0.305213, "fila_restante": 2}}
+2026-01-31 15:36:56,381 | triagem_sistema | INFO | {"operacao": "atender_proximo", "timestamp": "2026-01-31T15:36:56.381042", "detalhes": {"tempo_execucao": 0.001178741455078125, "sucesso": true}}
+2026-01-31 15:36:56,381 | triagem_sistema | INFO | {"operacao": "ordenar_por_prioridade", "timestamp": "2026-01-31T15:36:56.381234", "detalhes": {"tempo_execucao": 6.198883056640625e-06, "sucesso": true}}
+2026-01-31 15:36:56,381 | triagem_sistema | INFO | {"operacao": "obter_fila_ordenada", "timestamp": "2026-01-31T15:36:56.381492", "detalhes": {"tempo_execucao": 0.000293731689453125, "sucesso": true}}

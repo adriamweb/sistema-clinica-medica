@@ -7,6 +7,10 @@ Gerencia fila de espera com priorização por urgência e ordem de chegada.
 from typing import List
 from dataclasses import dataclass, field
 from datetime import datetime
+import time
+
+# Importar sistema de monitoramento
+from monitor_sistema import monitor, monitorar_performance, validar_entrada_paciente, gerar_relatorio_sistema
 
 
 @dataclass
@@ -19,10 +23,23 @@ class Paciente:
     
     def __post_init__(self) -> None:
         """Valida os dados do paciente após inicialização."""
-        if not 1 <= self.urgencia <= 5:
-            raise ValueError("Urgência deve estar entre 1 e 5")
-        if self.idade < 0:
-            raise ValueError("Idade deve ser positiva")
+        # Validação com logging integrado
+        if not validar_entrada_paciente(self.nome, self.idade, self.urgencia):
+            if not 1 <= self.urgencia <= 5:
+                raise ValueError("Urgência deve estar entre 1 e 5")
+            if self.idade < 0:
+                raise ValueError("Idade deve ser positiva")
+        
+        # Log de criação bem-sucedida
+        monitor.log_operacao(
+            operacao="criar_paciente",
+            detalhes={
+                'nome': self.nome,
+                'idade': self.idade,
+                'urgencia': self.urgencia,
+                'timestamp': self.timestamp.isoformat()
+            }
+        )
 
 
 class GerenciadorTriagem:
@@ -31,7 +48,9 @@ class GerenciadorTriagem:
     def __init__(self) -> None:
         """Inicializa o gerenciador com fila vazia."""
         self.fila: List[Paciente] = []
+        monitor.log_operacao("inicializar_gerenciador", {'fila_inicial': 0})
     
+    @monitorar_performance("triagem")
     def adicionar_paciente(self, paciente: Paciente) -> None:
         """
         Adiciona paciente à fila de triagem.
@@ -40,7 +59,26 @@ class GerenciadorTriagem:
             paciente: Paciente a ser adicionado
         """
         self.fila.append(paciente)
+        monitor.contadores['pacientes_adicionados'] += 1
+        
+        # Registrar métrica de tamanho da fila
+        monitor.registrar_metrica(
+            nome="tamanho_fila",
+            valor=len(self.fila),
+            categoria="capacidade",
+            detalhes={'operacao': 'adicionar_paciente'}
+        )
+        
+        monitor.log_operacao(
+            operacao="adicionar_paciente",
+            detalhes={
+                'paciente': paciente.nome,
+                'urgencia': paciente.urgencia,
+                'tamanho_fila': len(self.fila)
+            }
+        )
     
+    @monitorar_performance("triagem")
     def obter_fila_ordenada(self) -> List[Paciente]:
         """
         Retorna fila ordenada por prioridade de urgência e ordem de chegada.
@@ -49,8 +87,24 @@ class GerenciadorTriagem:
             Lista de pacientes ordenada por urgência (maior primeiro),
             depois por timestamp (quem chegou primeiro)
         """
-        return ordenar_por_prioridade(self.fila)
+        inicio = time.time()
+        resultado = ordenar_por_prioridade(self.fila)
+        tempo_ordenacao = time.time() - inicio
+        
+        # Registrar métricas de performance
+        monitor.contadores['operacoes_ordenacao'] += 1
+        monitor.contadores['tempo_total_ordenacao'] += tempo_ordenacao
+        
+        monitor.registrar_metrica(
+            nome="tempo_ordenacao",
+            valor=tempo_ordenacao,
+            categoria="performance",
+            detalhes={'tamanho_fila': len(self.fila)}
+        )
+        
+        return resultado
     
+    @monitorar_performance("triagem")
     def atender_proximo(self) -> Paciente:
         """
         Remove e retorna o próximo paciente da fila ordenada.
@@ -62,11 +116,41 @@ class GerenciadorTriagem:
             IndexError: Se a fila estiver vazia
         """
         if not self.fila:
+            monitor.log_erro_validacao(
+                erro="Tentativa de atender paciente com fila vazia",
+                dados_entrada={'tamanho_fila': 0}
+            )
             raise IndexError("Fila vazia")
         
         fila_ordenada = self.obter_fila_ordenada()
         proximo = fila_ordenada[0]
         self.fila.remove(proximo)
+        
+        monitor.contadores['pacientes_atendidos'] += 1
+        
+        # Calcular tempo de espera
+        tempo_espera = (datetime.now() - proximo.timestamp).total_seconds()
+        
+        monitor.registrar_metrica(
+            nome="tempo_espera",
+            valor=tempo_espera,
+            categoria="atendimento",
+            detalhes={
+                'paciente': proximo.nome,
+                'urgencia': proximo.urgencia
+            }
+        )
+        
+        monitor.log_operacao(
+            operacao="atender_paciente",
+            detalhes={
+                'paciente': proximo.nome,
+                'urgencia': proximo.urgencia,
+                'tempo_espera_segundos': tempo_espera,
+                'fila_restante': len(self.fila)
+            }
+        )
+        
         return proximo
     
     def listar_fila(self) -> None:
@@ -83,6 +167,7 @@ class GerenciadorTriagem:
             print(f"{i}. {paciente.nome} ({paciente.idade} anos) - {urgencia_texto} - Chegada: {chegada}")
 
 
+@monitorar_performance("ordenacao")
 def ordenar_por_prioridade(pacientes: List[Paciente]) -> List[Paciente]:
     """
     Ordena pacientes por urgência (maior primeiro) e timestamp (primeiro a chegar).
@@ -118,7 +203,7 @@ def obter_texto_urgencia(nivel: int) -> str:
 
 def demonstracao() -> None:
     """Demonstra o funcionamento do sistema com teste de desempate por timestamp."""
-    print("🏥 Sistema de Triagem - Clínica Médica (com timestamp)")
+    print("🏥 Sistema de Triagem - Clínica Médica (com monitoramento)")
     print("=" * 50)
     
     # Criar gerenciador
@@ -146,6 +231,12 @@ def demonstracao() -> None:
     triagem.adicionar_paciente(paciente_tardio)
     print(f"+ {paciente_tardio.nome} (urgência {paciente_tardio.urgencia}) - {paciente_tardio.timestamp.strftime('%H:%M:%S')}")
     
+    # Simular erro de validação
+    try:
+        paciente_invalido = Paciente("", -5, 10)
+    except ValueError as e:
+        print(f"\n⚠️  Erro capturado: {e}")
+    
     print("\n")
     triagem.listar_fila()
     
@@ -159,6 +250,9 @@ def demonstracao() -> None:
     
     print("\nFila após atendimento:")
     triagem.listar_fila()
+    
+    # Gerar relatório de monitoramento
+    gerar_relatorio_sistema()
 
 
 def main() -> None:
