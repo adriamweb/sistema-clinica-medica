@@ -5,13 +5,6 @@ Testes usando apenas bibliotecas padrão do Python.
 """
 
 from datetime import datetime, timedelta
-import sys
-import os
-
-# Adicionar o diretório correto ao path
-caminho_triagem = os.path.join(os.path.dirname(__file__), '..', 'Construção de Software (PRO)')
-sys.path.insert(0, os.path.abspath(caminho_triagem))
-
 from triagem import Paciente, ordenar_por_prioridade
 
 
